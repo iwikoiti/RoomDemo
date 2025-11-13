@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -27,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.roomdemo.ui.theme.RoomDemoTheme
 
 class MainActivity : ComponentActivity() {
@@ -54,6 +56,8 @@ fun RoomText(message: String, fontSize: Float){
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
     var quantity by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    //val productList by viewModel.allProducts.observeAsState(emptyList())
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -136,7 +140,9 @@ fun MainScreen(modifier: Modifier = Modifier) {
             }
         }
 
+        LazyColumn(modifier = Modifier.fillMaxWidth()){
 
+        }
     }
 }
 
