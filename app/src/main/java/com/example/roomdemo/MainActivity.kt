@@ -14,12 +14,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,10 +37,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val database = ProductRoomDatabase.getInstance(this)
+        val repository = ProductRepository(database.productDao())
+        val factory = ProductViewModelFactory(repository)
+
         setContent {
             RoomDemoTheme {
+                val viewModel: ProductViewModel = viewModel(factory = factory)
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    ScreenSetup(Modifier.padding(innerPadding))
+                    ScreenSetup(Modifier.padding(innerPadding), viewModel)
                 }
             }
         }
@@ -54,10 +62,11 @@ fun RoomText(message: String, fontSize: Float){
 }
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier) {
+fun MainScreen(modifier: Modifier = Modifier, viewModel: ProductViewModel) {
     var quantity by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
-    //val productList by viewModel.allProducts.observeAsState(emptyList())
+    val allProducts by viewModel.allProducts.observeAsState(emptyList())
+    var searchResult by remember { mutableStateOf<List<Product>>(emptyList()) }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -68,8 +77,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
     ){
 
         OutlinedTextField(
-            value = quantity,
-            onValueChange = { quantity = it},
+            value = name,
+            onValueChange = { name = it},
             modifier = Modifier
                 .fillMaxWidth(),
             label = { Text("Product Name") }
@@ -92,7 +101,13 @@ fun MainScreen(modifier: Modifier = Modifier) {
         ){
             Button(
                 onClick = {
-
+                    if (name.isNotBlank()) {
+                        quantity.toIntOrNull()?.let { qty ->
+                            viewModel.addProduct(name, qty)
+                            name = ""
+                            quantity = ""
+                        }
+                    }
                 },
                 modifier = Modifier.weight(1f)
             ) {
@@ -103,7 +118,11 @@ fun MainScreen(modifier: Modifier = Modifier) {
 
             Button(
                 onClick = {
-
+                    if (name.isNotBlank()) {
+                        viewModel.findProduct(name) { result ->
+                            searchResult = if (name.isBlank()) allProducts else result
+                        }
+                    }
                 },
                 modifier = Modifier.weight(1f)
             ) {
@@ -121,7 +140,11 @@ fun MainScreen(modifier: Modifier = Modifier) {
         ){
             Button(
                 onClick = {
-
+                    if (name.isNotBlank()) {
+                        viewModel.deleteProduct(name)
+                        name = ""
+                        quantity = ""
+                    }
                 },
                 modifier = Modifier.weight(1f)
             ) {
@@ -132,7 +155,9 @@ fun MainScreen(modifier: Modifier = Modifier) {
 
             Button(
                 onClick = {
-
+                    name = ""
+                    quantity = ""
+                    searchResult = emptyList()
                 },
                 modifier = Modifier.weight(1f)
             ) {
@@ -140,23 +165,41 @@ fun MainScreen(modifier: Modifier = Modifier) {
             }
         }
 
+        val productsToDisplay = if (searchResult.isNotEmpty()) searchResult else allProducts
         LazyColumn(modifier = Modifier.fillMaxWidth()){
-
+            items(productsToDisplay) { product ->
+                ProductItem(product)
+            }
         }
     }
 }
 
 @Composable
-fun ScreenSetup(modifier: Modifier = Modifier) {
-    MainScreen(modifier)
+fun ProductItem(product: Product) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp, horizontal = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(product.productName)
+        Text("Qty: ${product.quantity}")
+    }
+    //Divider()
 }
 
-@Preview(showSystemUi = true)
 @Composable
-fun ScreenSetupPreview(){
-    RoomDemoTheme{
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            ScreenSetup(Modifier.padding(innerPadding))
-        }
-    }
+fun ScreenSetup(modifier: Modifier = Modifier, viewModel: ProductViewModel) {
+    MainScreen(modifier, viewModel)
 }
+
+//@Preview(showSystemUi = true)
+//@Composable
+//fun ScreenSetupPreview(){
+//
+//    RoomDemoTheme{
+//        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+//            ScreenSetup(Modifier.padding(innerPadding), viewModel)
+//        }
+//    }
+//}

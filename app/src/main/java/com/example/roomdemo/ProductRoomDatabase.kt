@@ -18,7 +18,9 @@ abstract class ProductRoomDatabase: RoomDatabase() {
                         context.applicationContext,
                         ProductRoomDatabase::class.java,
                         "product_database"
-                    ).fallbackToDestructiveMigration().build()
+                    ).fallbackToDestructiveMigration()
+                        .allowMainThreadQueries()
+                        .build()
                     INSTANCE = instance
                 }
                 return instance
