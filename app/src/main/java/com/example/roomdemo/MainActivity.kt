@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -27,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,14 +53,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
-
-@Composable
-fun RoomText(message: String, fontSize: Float){
-    Text(
-        text = message,
-        fontSize = fontSize.sp,
-    )
 }
 
 @Composable
@@ -165,8 +159,23 @@ fun MainScreen(modifier: Modifier = Modifier, viewModel: ProductViewModel) {
             }
         }
 
+        Spacer(modifier = Modifier.width(50.dp))
+
         val productsToDisplay = if (searchResult.isNotEmpty()) searchResult else allProducts
         LazyColumn(modifier = Modifier.fillMaxWidth()){
+            item {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp, horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text  = "Product", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text(text  = "Quantity", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+                Divider()
+            }
+
             items(productsToDisplay) { product ->
                 ProductItem(product)
             }
@@ -182,10 +191,11 @@ fun ProductItem(product: Product) {
             .padding(vertical = 4.dp, horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
+
         Text(product.productName)
-        Text("Qty: ${product.quantity}")
+        Text("${product.quantity}")
     }
-    //Divider()
+    Divider()
 }
 
 @Composable
