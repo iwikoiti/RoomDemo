@@ -27,13 +27,23 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
+@Composable
+fun MainScreen(modifier: Modifier = Modifier) {
+
+}
+
 @Composable
 fun ScreenSetup(modifier: Modifier = Modifier) {
     MainScreen(modifier)
 }
 
-//@Preview(showBackground = true)
+@Preview(showSystemUi = true)
 @Composable
-fun MainScreen(modifier: Modifier = Modifier) {
-
+fun ScreenSetupPreview(){
+    RoomDemoTheme{
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            ScreenSetup(Modifier.padding(innerPadding))
+        }
+    }
 }
